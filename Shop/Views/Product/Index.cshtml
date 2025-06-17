@@ -1,0 +1,146 @@
+﻿@model IEnumerable<Shop.Models.Product>
+@using Microsoft.AspNetCore.Identity
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Product List";
+    var isAdmin = User.IsInRole("Admin");
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var cart = HttpContextAccessor.HttpContext.Session.GetObject<List<Shop.Models.Product>>("Cart") ?? new List<Shop.Models.Product>();
+    var cartCount = cart.Count;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/products.css" asp-append-version="true" />
+
+<style>
+    .product-card {
+        transition: transform 0.2s;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .truncate-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">🛒 Danh sách sản phẩm</h2>
+        <div>
+            @if (!isAuthenticated)
+            {
+                <a href="/Account/Login" class="btn btn-outline-secondary">🔐 Đăng nhập</a>
+            }
+            else
+            {
+                <span class="me-2 text-muted">👤 @User.Identity.Name</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger">🚪 Đăng xuất</button>
+                </form>
+            }
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary ms-3 position-relative">
+                🛒 Giỏ hàng
+                @if (cartCount > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        @cartCount
+                        <span class="visually-hidden">sản phẩm trong giỏ</span>
+                    </span>
+                }
+            </a>
+        </div>
+    </div>
+
+    @if (isAdmin)
+    {
+        <div class="mb-3 text-end">
+            <a asp-action="Add" class="btn btn-success">
+                ➕ Thêm sản phẩm
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Hình ảnh</th>
+                        <th scope="col">Tên sản phẩm</th>
+                        <th scope="col">Giá</th>
+                        <th scope="col">Mô tả</th>
+                        <th scope="col">Danh mục</th>
+                        <th scope="col">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl" class="img-thumbnail" style="max-width: 100px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không có ảnh</span>
+                                }
+                            </td>
+                            <td>@product.Name</td>
+                            <td>@product.Price.ToString("C")</td>
+                            <td class="text-truncate" style="max-width: 200px;">@product.Description</td>
+                            <td>@product.Category?.Name</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Display" asp-route-id="@product.Id" class="btn btn-sm btn-info">👁️ Xem</a>
+                                    <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-warning">✏️ Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-danger">🗑️ Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    <div class="card product-card h-100 shadow-sm">
+                        <img src="@product.ImageUrl" class="card-img-top" alt="Hình ảnh" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title truncate-text">@product.Name</h5>
+                            <p class="card-text text-truncate">@product.Description</p>
+                            <p class="card-text"><strong>@product.Price.ToString("C")</strong></p>
+                            <p class="text-muted">📂 @product.Category?.Name</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Display" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary">👁️ Xem</a>
+                                @if (isAuthenticated)
+                                {
+                                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                        <input type="hidden" name="productId" value="@product.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">➕ Giỏ hàng</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+}

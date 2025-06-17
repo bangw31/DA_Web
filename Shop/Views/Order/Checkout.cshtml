@@ -1,0 +1,19 @@
+﻿@model Shop.Models.Order
+
+<h2>🧾 Thanh toán</h2>
+
+<form asp-action="Checkout" method="post">
+    <div class="mb-3">
+        <label for="CustomerName" class="form-label">Họ tên</label>
+        <input asp-for="CustomerName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label for="CustomerEmail" class="form-label">Email</label>
+        <input asp-for="CustomerEmail" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label for="CustomerAddress" class="form-label">Địa chỉ</label>
+        <input asp-for="CustomerAddress" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">✅ Xác nhận thanh toán</button>
+</form>

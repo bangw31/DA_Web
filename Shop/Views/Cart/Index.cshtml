@@ -1,0 +1,63 @@
+﻿@model List<CartItem>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var total = Model.Sum(x => x.Total);
+}
+
+<h2>🛒 Giỏ hàng của bạn</h2>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Giỏ hàng trống.</p>
+    <a href="/" class="btn btn-secondary">🏠 Quay lại trang chủ</a>
+}
+else
+{
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Ảnh</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td><img src="@item.ImageUrl" width="60" class="img-thumbnail" /></td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>
+                        <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" name="actionType" value="decrease" class="btn btn-sm btn-outline-secondary me-1">➖</button>
+                            <span>@item.Quantity</span>
+                            <button type="submit" name="actionType" value="increase" class="btn btn-sm btn-outline-secondary ms-1">➕</button>
+                        </form>
+                    </td>
+                    <td>@item.Total.ToString("C")</td>
+                    <td>
+                        <a asp-action="Remove" asp-route-productId="@item.ProductId" class="btn btn-danger btn-sm">🗑️ Xóa</a>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="4" class="text-end"><strong>Tổng cộng:</strong></td>
+                <td colspan="2"><strong>@total.ToString("C")</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between">
+        <div>
+            <a asp-action="Clear" class="btn btn-warning">🧹 Xóa tất cả</a>
+            <a href="/" class="btn btn-secondary">🏠 Quay lại trang chủ</a>
+        </div>
+        <a asp-controller="Order" asp-action="Checkout" class="btn btn-primary">Thanh toán</a>
+
+    </div>
+}
